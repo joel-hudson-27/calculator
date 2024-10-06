@@ -1,0 +1,23 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+
+.outer,
+#calc-main-container,
+#button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#display-container {
+    
+}
+
+#calc-main-container {
+    width: 580px;
+    height: 650px;
+    border: 5px black solid;
+}
