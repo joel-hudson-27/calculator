@@ -6,38 +6,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculator</title>
     <link rel="stylesheet" type="text/css" href="style.css" />
+    <script type="text/javascript" src="calc.js" defer></script>
 </head>
 
 <body>
     <h1>Calculator</h1>
     <div class="outer">
-        <div id="calc-main-container">
-            <div id="calc-display-container"></div>
-            <div id="button-container">
-                <button>C</button>
-                <button>(</button>
-                <button>)</button>
+        <div id="calc-container">
+            <div id="calc-display">
+                <p id="calc-display_result"></p>
+            </div>
+            <div id="calc-buttons">
+                <button class="clear">C</button>
+                <button class="paren">(</button>
+                <button class="paren">)</button>
                 <button>mod</button>
-                <button>π</button>
-                <button>7</button>
-                <button>8</button>
-                <button>9</button>
-                <button>÷</button>
-                <button>√</button>
-                <button>4</button>
-                <button>5</button>
-                <button>6</button>
-                <button>*</button>
-                <button>x<sup>y</sup></button>
-                <button>1</button>
-                <button>2</button>
-                <button>3</button>
-                <button>-</button>
-                <button>0</button>
+                <button class="pi">π</button>
+                <button class="numeral">7</button>
+                <button class="numeral">8</button>
+                <button class="numeral">9</button>
+                <button class="operation">÷</button>
+                <button class="operation">√</button>
+                <button class="numeral">4</button>
+                <button class="numeral">5</button>
+                <button class="numeral">6</button>
+                <button class="operation">*</button>
+                <button class="operation">x<sup>y</sup></button>
+                <button class="numeral">1</button>
+                <button class="numeral">2</button>
+                <button class="numeral">3</button>
+                <button class="operation">-</button>
+                <button class="large-button">=</button>
+                <button class = "numeral">0</button>
                 <button>.</button>
-                <button>%</button>
-                <button>+</button>
-                <button>=</button>
+                <button class="operation">%</button>
+                <button class="operation">+</button>
+                
             </div>
         </div>
     </div>
