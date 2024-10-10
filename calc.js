@@ -44,11 +44,15 @@ const tokenTypes = {
 };
 
 const tokenRegex = [
-    [/^(?:\d+(?:\.\d*)?|\.\d+)/g, tokenTypes.NUMBER],
-    [/[a-z]+/g, tokenTypes.FUNCTION],
-
-
-
+    [/^(?:\d+(?:\.\d*)?|\.\d+)/, tokenTypes.NUMBER],
+    [/^[a-z]+/, tokenTypes.FUNCTION],
+    [/^\+/, tokenTypes.ADDITION],
+    [/^\-/, tokenTypes.ADDITION],
+    [/^\*/, tokenTypes.ADDITION],
+    [/^\\/, tokenTypes.ADDITION],
+    [/^\^/, tokenTypes.ADDITION],
+    [/^\(/, tokenTypes.ADDITION],
+    [/^\)/, tokenTypes.ADDITION]
 ];
 
 const functionList = ['sqrt'];
@@ -133,17 +137,45 @@ function isFunction(token) {
 //     {assert the operator on top of the stack is not a (left) parenthesis}
 //     pop the operator from the operator stack onto the output queue
 
+
+
 function tokenizeExpression(expression) {
-    const operatorRegex = /([()+\-*/])/g;
-    const tokens = expression.split(operatorRegex);
-    return tokens;
+    let currIndex = 0;
+    let result = [];
+
+    while (currIndex < expression.length) {
+        let substr = expression.substring(currIndex);
+        for (let i = 0; i < tokenRegex.length; i++) {
+            const regex = tokenRegex[i][0];
+            const tokenFound = substr.match(regex);
+
+            if (tokenFound) {
+                const tokenIndex = tokenFound.index;
+                result.push(tokenFound[0]);
+                currIndex += tokenFound[0].length;
+                break;
+            } 
+        }
+    }
+    return result;
 }
+
+function evaluateExpression(expression) {
+    
+}
+
+const expr1 = "(3.12+2)*2*4";
+const expr2 = "3.12+2*2*4"
+console.log(tokenizeExpression(expr1));
+console.log(parse(tokenizeExpression(expr1)));
+console.log(tokenizeExpression(expr2));
+console.log(parse(tokenizeExpression(expr2)));
 
 function parse(tokens) {
     let operatorStack = [];
     let outputQueue = [];
     for (let i = 0; i < tokens.length; i++) {
-        
+
         let token = tokens[i];
 
         //console.log(outputQueue);
@@ -158,7 +190,7 @@ function parse(tokens) {
         else if (Object.keys(operators).includes(token)) {
             //let stackTop = operatorStack.at(-1);
             while (operatorStack.length > 0 &&
-            operatorStack.at(-1) !== '(' &&
+                operatorStack.at(-1) !== '(' &&
                 (operators[operatorStack.at(-1)].precedence > operators[token].precedence ||
                     (operators[operatorStack.at(-1)].precedence == operators[token].precedence) &&
                     operators[token].association === 'left')) {
@@ -170,10 +202,10 @@ function parse(tokens) {
             operatorStack.push(token);
         }
         else if (token === ')') {
-        
+
             while (operatorStack.length > 0 && operatorStack.at(-1) !== '(') {
                 outputQueue.push(operatorStack.pop());
-                
+
             }
             console.assert(operatorStack.at(-1) === '(', 'Invalid Expression - Mismatched Parentheses');
             operatorStack.pop();
@@ -182,19 +214,18 @@ function parse(tokens) {
             }
         }
     }
-    while(operatorStack.length > 0){
+    while (operatorStack.length > 0) {
         console.assert(operatorStack.at(-1) !== '(', 'Invalid Expression - Mismatched Parentheses');
         outputQueue.push(operatorStack.pop());
     }
     return outputQueue;
 }
 
-const expr1 = "(3+2)*2";
-console.log(tokenizeExpression(expr1));
+
 //console.log(parse(tokenizeExpression(expr1)));
 
 function evaluateExpression(outPutQueue) {
-    
+
 }
 
 // function createNode(type, value, children = []){
