@@ -1,37 +1,6 @@
-// function validRightParen(expression) {
-//     let leftCount = 0;
-//     let rightCount = 0;
-//     for (let i = 0; i < expression.length; i++) {
-//         if (rightCount > leftCount) {
-//             return false;
-//         }
-//         else if (expression[i] === ")") {
-//             rightCount++;
-//         }
-//         else if (expression[i] === "(") {
-//             leftCount++;
-//         }
-//     }
-
-//     return (leftCount == rightCount);
-// }
-
-// function trimLeadingZeros(operand) {
-//     const decimalPlace = ".";
-//     let result = "";
-//     if (operand.includes(decimalPlace, 0)) {
-//         result = operand.replace(/^0+/, '0');
-//     }
-//     else {
-//         result = operand.replace(/^0+/, '');
-//     }
-
-//     return result;
-// }
-
 const tokenTypes = {
     NUMBER: 'NUMBER',
-    FUNCTION: 'FUNCTION',
+    IDENTIFIER: 'IDENTIFIER',
     ADDITION: '+',
     SUBTRACTION: '-',
     MULTIPLICATION: '*',
@@ -41,19 +10,28 @@ const tokenTypes = {
     PARENTHESIS_RIGHT: ')',
     MODULUS: 'MOD',
     PERCENT: '%',
+    UNARY_MINUS: 'UM',
 };
 
 const tokenRegex = [
     [/^(?:\d+(?:\.\d*)?|\.\d+)/, tokenTypes.NUMBER],
-    [/^[a-z]+/, tokenTypes.FUNCTION],
+    [/^[a-z]+/, tokenTypes.IDENTIFIER],
     [/^\+/, tokenTypes.ADDITION],
-    [/^\-/, tokenTypes.ADDITION],
-    [/^\*/, tokenTypes.ADDITION],
-    [/^\\/, tokenTypes.ADDITION],
-    [/^\^/, tokenTypes.ADDITION],
-    [/^\(/, tokenTypes.ADDITION],
-    [/^\)/, tokenTypes.ADDITION]
+    [/^\*/, tokenTypes.MULTIPLICATION],
+    [/^\\/, tokenTypes.DIVISION],
+    [/^\^/, tokenTypes.EXPONENTIATION],
+    [/^\(/, tokenTypes.PARENTHESIS_LEFT],
+    [/^\)/, tokenTypes.PARENTHESIS_RIGHT],
+    [/\-/, tokenTypes.SUBTRACTION],
+
 ];
+
+const unMinus = () => {
+    let unRegex = '';
+    for (let i = 0; i < length(tokenRegex); i++) {
+        unRegex;
+    }
+};
 
 const functionList = ['sqrt'];
 
@@ -103,89 +81,86 @@ function isFunction(token) {
     return functionList.includes(token);
 }
 
-// while there are tokens to be read:
-//     read a token
-//     if the token is:
-//     - a number:
-//         put it into the output queue
-//     - a function:
-//         push it onto the operator stack 
-//     - an operator o1:
-//         while (
-//             there is an operator o2 at the top of the operator stack which is not a left parenthesis, 
-//             and (o2 has greater precedence than o1 or (o1 and o2 have the same precedence and o1 is left-associative))
-//         ):
-//             pop o2 from the operator stack into the output queue
-//         push o1 onto the operator stack
-//     - a ",":
-//         while the operator at the top of the operator stack is not a left parenthesis:
-//              pop the operator from the operator stack into the output queue
-//     - a left parenthesis (i.e. "("):
-//         push it onto the operator stack
-//     - a right parenthesis (i.e. ")"):
-//         while the operator at the top of the operator stack is not a left parenthesis:
-//             {assert the operator stack is not empty}
-//             /* If the stack runs out without finding a left parenthesis, then there are mismatched parentheses. */
-//             pop the operator from the operator stack into the output queue
-//         {assert there is a left parenthesis at the top of the operator stack}
-//         pop the left parenthesis from the operator stack and discard it
-//         if there is a function token at the top of the operator stack, then:
-//             pop the function from the operator stack into the output queue
-// /* After the while loop, pop the remaining items from the operator stack into the output queue. */
-// while there are tokens on the operator stack:
-//     /* If the operator token on the top of the stack is a parenthesis, then there are mismatched parentheses. */
-//     {assert the operator on top of the stack is not a (left) parenthesis}
-//     pop the operator from the operator stack onto the output queue
+function getCurrentSlice(str, startIndex) {
+    return str.slice(startIndex, );
+}
 
-
+function isUnaryMinus(prevToken, currToken) {
+    const validChar = /[^0-9.)]/;
+    return currToken === '-' &&
+        (prevToken === undefined || validChar.test(prevToken));
+}
 
 function tokenizeExpression(expression) {
     let currIndex = 0;
     let result = [];
+    let substr = expression;
 
     while (currIndex < expression.length) {
-        let substr = expression.substring(currIndex);
+
         for (let i = 0; i < tokenRegex.length; i++) {
             const regex = tokenRegex[i][0];
             const tokenFound = substr.match(regex);
 
-            if (tokenFound) {
-                const tokenIndex = tokenFound.index;
+            if(!tokenFound){
+                continue;
+            }
+
+            if (isUnaryMinus(result[result.length - 1], tokenFound[0])) {
+                result.push('u');
+            }
+
+            else if (tokenFound) {
                 result.push(tokenFound[0]);
-                currIndex += tokenFound[0].length;
-                break;
-            } 
+            }
+
+            currIndex += tokenFound[0].length;
+            substr = expression.substring(currIndex);
+            break;
         }
     }
     return result;
 }
 
 function evaluateExpression(expression) {
-    
+    let stack = [];
+    let tokens = parse(expression);
+    foreach(token in tokens){
+        switch(token){
+            case !isNaN(token):
+                stack.push(token);
+                break;
+            case 
+        }
+    }
 }
 
 const expr1 = "(3.12+2)*2*4";
-const expr2 = "3.12+2*2*4"
-console.log(tokenizeExpression(expr1));
-console.log(parse(tokenizeExpression(expr1)));
-console.log(tokenizeExpression(expr2));
+const expr2 = "(3.12--2)";
+// console.log(tokenizeExpression(expr1));
+// console.log(parse(tokenizeExpression(expr1)));
+//console.log(tokenizeExpression(expr2));
 console.log(parse(tokenizeExpression(expr2)));
+console.log(parse(tokenizeExpression(expr1)));
 
 function parse(tokens) {
     let operatorStack = [];
     let outputQueue = [];
+    let prevToken = null;
     for (let i = 0; i < tokens.length; i++) {
 
         let token = tokens[i];
-
-        //console.log(outputQueue);
-        //console.log(token);
 
         if (!isNaN(token)) {
             outputQueue.push(token);
         }
         else if (isFunction(token)) {
             operatorStack.push(token);
+        }
+        else if (Object.keys(operators).includes(token) &&
+            token === prevToken &&
+            token === '-') {
+            operatorStack.push('u');
         }
         else if (Object.keys(operators).includes(token)) {
             //let stackTop = operatorStack.at(-1);
@@ -213,6 +188,7 @@ function parse(tokens) {
                 outputQueue.push(operatorStack.pop());
             }
         }
+        prevToken = tokens[i];
     }
     while (operatorStack.length > 0) {
         console.assert(operatorStack.at(-1) !== '(', 'Invalid Expression - Mismatched Parentheses');
@@ -221,21 +197,9 @@ function parse(tokens) {
     return outputQueue;
 }
 
-
-//console.log(parse(tokenizeExpression(expr1)));
-
 function evaluateExpression(outPutQueue) {
 
 }
-
-// function createNode(type, value, children = []){
-//     return {
-//         type: type,
-//         value: value,
-//         children: children
-//     };
-// }
-
 
 let displayText = '';
 let currentState = 'idle';
