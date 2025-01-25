@@ -278,7 +278,9 @@ function handleEvent(event) {
   }
 
   if (eventText === "=") {
-    tokenizeExpression(displayText);
+    let tokens = tokenizeExpression(displayText);
+    let expression_polish = parse(tokens);
+    displayText = evaluateExpression(expression_polish);
     updateState("result", displayText);
   }
 
@@ -293,6 +295,7 @@ function handleEvent(event) {
       handleInputtingOperatorState(eventType, eventText);
       break;
     case "result":
+      handleResultState(eventType, eventText);
       break;
     default:
       currenState = "error";
@@ -337,7 +340,7 @@ function handleResultState(eventType, eventText) {
     displayText += eventText;
     updateState("inputtingOperator", displayText);
   } else if (eventType === "numeral") {
-    displayText += eventText;
+    displayText = eventText;
     updateState("inputtingNumber", displayText);
   }
 }
