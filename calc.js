@@ -99,8 +99,16 @@ function applyOperator(op, x, y = null) {
 function isUnaryMinus(prevToken, currToken) {
   //a unary minus is only at very beginning left of another operator/function or (
   const validChar = /[^0-9.)]/;
+  //does the above work for (-3+2)? It doesn't work for 3-*5
   return (
     currToken === "-" && (prevToken === undefined || validChar.test(prevToken))
+  );
+}
+
+function isUnaryPlus(prevToken, currToken) {
+  const validChar = /a/;
+  return (
+    currToken === "+" && (prevToken === undefined || validChar.test(prevToken))
   );
 }
 
@@ -131,82 +139,6 @@ function tokenizeExpression(expression) {
   }
   return result;
 }
-
-function evaluateExpression(expression) {
-  console.log("here");
-
-  let stack = [];
-  let tokens = parse(expression);
-  let x = 0;
-  let y = 0;
-
-  for (let i = 0; i < tokens.length; i++) {
-
-    // Grab the current token once
-    const token = tokens[i];
-
-    // If it's a number, push to stack
-    if (!isNaN(token)) {
-      stack.push(Number(token)); // parseFloat or Number
-    } else {
-      // Otherwise switch on known operator strings
-      switch (token) {
-        case "u":
-          x = stack.pop() * -1;
-          stack.push(x);
-          break;
-        case "+":
-          x = stack.pop();
-          y = stack.pop();
-          stack.push(y + x);
-          break;
-        case "-":
-          x = stack.pop();
-          y = stack.pop();
-          stack.push(y - x);
-          break;
-        case "*":
-          x = stack.pop();
-          y = stack.pop();
-          stack.push(y * x);
-          break;
-        case "/":
-          x = stack.pop();
-          y = stack.pop();
-          stack.push(y / x);
-          break;
-        case "^":
-          x = stack.pop();
-          y = stack.pop();
-          stack.push(Math.pow(y, x));
-          break;
-        case "%":
-          x = stack.pop();
-          stack.push(x / 100);
-          break;
-        case "mod":
-          x = stack.pop();
-          y = stack.pop();
-          stack.push(y % x);
-          break;
-        default:
-          console.log("Invalid token found in Evaluation: ", token);
-          break;
-      }
-    }
-  }
-  return stack.pop();
-}
-
-const expr1 = "(3.12+2)*2+4";
-const expr2 = "-(-3.12--2)";
-// console.log(tokenizeExpression(expr1));
-// console.log(parse(tokenizeExpression(expr1)));
-//console.log(tokenizeExpression(expr2));
-console.log(parse(tokenizeExpression(expr2)));
-console.log(parse(tokenizeExpression(expr1)));
-let val = tokenizeExpression(expr1);
-console.log(evaluateExpression(val));
 
 function parse(tokens) {
   let operatorStack = [];
@@ -266,83 +198,134 @@ function parse(tokens) {
   return outputQueue;
 }
 
+//takes input of a parsed function in reverse polish notation and returns evaluated result
+function evaluateExpression(parsedExpression) {
+  let stack = [];
+  let x = 0;
+  let y = 0;
+
+  for (let i = 0; i < parsedExpression.length; i++) {
+    // Grab the current token once
+    let token = parsedExpression[i];
+    console.log(stack);
+    console.log(parsedExpression);
+
+    // If it's a number, push to stack
+    if (!isNaN(token)) {
+      stack.push(Number(token)); // parseFloat or Number
+    } else {
+      // Otherwise switch on known operator strings
+      switch (token) {
+        case "u":
+          x = stack.pop();
+          stack.push(x * -1);
+          break;
+        case "+":
+          x = stack.pop();
+          y = stack.pop();
+          stack.push(y + x);
+          break;
+        case "-":
+          x = stack.pop();
+          y = stack.pop();
+          stack.push(y - x);
+          break;
+        case "*":
+          x = stack.pop();
+          y = stack.pop();
+          stack.push(y * x);
+          break;
+        case "/":
+          x = stack.pop();
+          y = stack.pop();
+          stack.push(y / x);
+          break;
+        case "^":
+          x = stack.pop();
+          y = stack.pop();
+          stack.push(Math.pow(y, x));
+          break;
+        case "%":
+          x = stack.pop();
+          stack.push(x / 100);
+          break;
+        case "mod":
+          x = stack.pop();
+          y = stack.pop();
+          stack.push(y % x);
+          break;
+        default:
+          console.log("Invalid token found in Evaluation: ", token);
+          break;
+      }
+    }
+  }
+  return stack.pop();
+}
+
+const expr1 = "(3.12+2)*2+4";
+const expr2 = "-5+2";
+// console.log(tokenizeExpression(expr1));
+// console.log(parse(tokenizeExpression(expr1)));
+//console.log(tokenizeExpression(expr2));
+//console.log(parse(tokenizeExpression(expr2)));
+//console.log(parse(tokenizeExpression(expr1)));
+//let val = tokenizeExpression(expr1);
+//console.log(evaluateExpression(val));
+//console.log(evaluateExpression(parse(tokenizeExpression(expr2))));
+
 let displayText = "";
 let currentState = "idle";
 function handleEvent(event) {
-  let eventType = event.target.classList[0];
   let eventText = event.target.textContent;
+  let eventType = event.target.className;
 
   if (eventText === "C") {
     resetCalculator();
     return;
-  }
-
-  if (eventText === "=") {
+  } else if (eventText === "=") {
     let tokens = tokenizeExpression(displayText);
     let expression_polish = parse(tokens);
     displayText = evaluateExpression(expression_polish);
+    console.log(displayText);
     updateState("result", displayText);
-  }
-
-  switch (currentState) {
-    case "idle":
-      handleIdleState(eventType, eventText);
-      break;
-    case "inputtingNumber":
-      handleInputtingNumberState(eventType, eventText);
-      break;
-    case "inputtingOperator":
-      handleInputtingOperatorState(eventType, eventText);
-      break;
-    case "result":
-      handleResultState(eventType, eventText);
-      break;
-    default:
-      currenState = "error";
-      displayText = "error";
-      break;
+  } else {
+    switch (currentState) {
+      case "idle":
+        handleIdleState(eventText);
+        break;
+      case "input":
+        handleInputState(eventText);
+        break;
+      case "result":
+        handleResultState(eventType, eventText);
+        break;
+      default:
+        currentState = "error";
+        displayText = "error";
+        break;
+    }
   }
 }
 
-function handleIdleState(eventType, eventText) {
-  if (eventType === "numeral") {
-    displayText += eventText;
-    updateState("inputtingNumber", displayText);
-  }
-  //can handle left paren, square root, decimal point
+function handleIdleState(eventText) {
+  displayText += eventText;
+  updateState("input", displayText);
 }
 
-function handleInputtingNumberState(eventType, eventText) {
-  if (eventType === "operation") {
-    displayText += eventText;
-    updateState("inputtingOperator", displayText);
-  } else if (eventType === "numeral") {
-    displayText += eventText;
-    updateState("inputtingNumber", displayText);
-  }
+function handleInputState(eventText) {
+  displayText += eventText;
+  updateState("input", displayText);
 }
 
-function handleInputtingOperatorState(eventType, eventText) {
-  if (eventType === "numeral") {
-    displayText += eventText;
-    updateState("inputtingNumber", displayText);
-  } else if (eventType === "operation" && eventText === "-") {
-    displayText += eventText;
-    updateState("inputtingOperator", displayText);
-  } else if (eventType === "operation") {
-    displayText[displayText.length - 1] = eventText;
-    updateState("inputtingOperator", displayText);
-  }
-}
-
+//with pi/sqrt should multiply. Other ops it applies. Other numberal it overwrites
 function handleResultState(eventType, eventText) {
-  if (eventType === "operation") {
-    displayText += eventText;
-    updateState("inputtingOperator", displayText);
-  } else if (eventType === "numeral") {
+  if (eventType === "numeral") {
     displayText = eventText;
-    updateState("inputtingNumber", displayText);
+  } else {
+    displayText += eventText;
   }
+  updateState("input", displayText);
 }
 
 function updateState(newState, value = "") {
